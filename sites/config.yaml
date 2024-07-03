@@ -1,4 +1,10 @@
 fifteensquared:
   site_url:  https://www.fifteensquared.net/
   site_base: ./sites/fifteensquared
+  css_content: div.entry-content
+    
+  
 
+#timesforthetimes.co.uk
+#  same 'div', class_='entry-content' for article body
+#   example page contained table format - but each entry is in 2 trs...

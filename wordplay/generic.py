@@ -29,21 +29,6 @@ def add_num_to_found(found, txt):
   except:
     pass
 
-standard_terms={
-  'cryptic definition': 'Cryptic Definition',
-  'double definition': 'Double Definition',
-  'dd': 'Double Definition',
-  '&lit;': '&lit;',
-}
-
-def standardise_wordplay(txt):
-  tl=txt.lower()
-  for term, standardised in standard_terms.items():
-    if tl.startswith(term):
-      txt = standardised + txt[len(term):]
-      break
-  return txt
-
 def add_text_snippets_to_found(found, txt, allow_clue=False, debug=False):
   if debug: print(f'Looking for things in "{txt}" {allow_clue=}')
   add_num_to_found(found, txt)
@@ -92,11 +77,11 @@ def add_text_snippets_to_found(found, txt, allow_clue=False, debug=False):
     elif score_wordplay>0:
       if len(found.get('wordplay',''))==0:
         if debug: print(f"Setting found['wordplay']={txt}")
-        txt_wordplay = standardise_wordplay(txt)
-        found['wordplay']=txt_wordplay
+        #txt_wordplay = standardise_wordplay(txt)
+        found['wordplay']=txt
       else:
-        txt_wordplay = standardise_wordplay(txt)
-        if txt_wordplay != found['wordplay']:
+        #txt_wordplay = standardise_wordplay(txt)
+        if txt != found['wordplay']:
           print(f"Setting found['comment']={txt}")
           found['comment']=(found.get('comment','')+' '+txt).strip()
 

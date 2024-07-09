@@ -2,9 +2,13 @@ fifteensquared:
   site_url:  https://www.fifteensquared.net/
   site_base: ./sites/fifteensquared
   css_content: div.entry-content
+  # custom parsers in wordplay.custom: "FTS-style" and "P-style"
+  #   that (older) code was used for original dataset (pre-2024-08)
+  #   both work fine using generic parser too - and enlarge dataset's potential 
     
+timesforthetimes:
+  site_url:  https://timesforthetimes.co.uk/
+  site_base: ./sites/timesforthetimes
+  css_content: div.entry-content
+  #   example page contained table format - but each entry is in 2 trs...
   
-
-#timesforthetimes.co.uk
-#  same 'div', class_='entry-content' for article body
-#   example page contained table format - but each entry is in 2 trs...

@@ -10,6 +10,7 @@ from urllib.parse import urlparse  # To extract path information from urls
 #import numpy as np  
 import random # For random delays
 
+#import wordplay.custom, wordplay.generic
 
 def rel_path(p):
   return os.path.join(os.path.dirname(__file__), p)
@@ -123,6 +124,100 @@ def get_content_from(site, fname_stub, author='teacow'):
 
 
 
+def parse_content(soup, use_custom=False, use_generic=True):
+  problem_arr=[]
+  content=soup.find('div', class_='entry-content')
+  
+  if use_custom:
+    if soup.find('div', class_='fts-group'):
+      print("  fts-style custom parser")
+      problem_arr = wordplay.custom.clue_fts_style(content)
+    else: # Default
+      print("  p-style custom parser")
+      problem_arr = wordplay.custom.clue_p_style(content)
+    if len(problem_arr)==0:
+      print("  FAILED TO EXTRACT DATA using custom parsers")
+      
+  if use_generic:
+    print("  generic parser")
+    problem_arr = wordplay.generic.ETC(content)
+    if len(problem_arr)==0:
+      print("  FAILED TO EXTRACT DATA using generic parser")
+      
+  return problem_arr
+
+
+def fix_ad_for_list(problem_arr):
+  # Let's run through the #num for all the problems, and look for the 'restart' of the ordering 
+  #   First : Check whether we've got numbers for everything
+  drops, drop_last = 0, -1
+  for i in range(len(problem_arr)-1):
+    if problem_arr[i].num > problem_arr[i+1].num:
+      drops+=1
+      drop_last=i
+  #print(f"{drops=}, {drop_last=}")
+  if drops==1: # Expected, good, case
+    for i,p in enumerate(problem_arr):
+      ad = 'A' if i<=drop_last else 'D'
+      if len(p.ad)==0:
+        p.ad=ad
+      else:
+        if ad!=p.ad:
+          print(f"Mismatched Across/Down!\n  {p}")
+  return problem_arr
+
+def extract_pattern_from_clue_and_normalise(problem_arr):
+  for p in problem_arr:
+    if len(p.clue)>0:
+      if len(p.pattern)==0:  # Get the pattern out of the clue
+        clue = p.clue
+        bracket_index=clue.rfind('(')
+        if bracket_index<0: 
+          print(f"No pattern found in '{clue}'")
+          p.valid=False  # Must be able to find a pattern
+        else:
+          p.clue    = clue[:bracket_index].strip()
+          p.pattern = clue[bracket_index+1:]
+    p.pattern = p.pattern.replace('(','').replace(')','').strip()
+  return problem_arr
+
 # Process different page styles...
 has_reference = re.compile('[Ss]ee[\s\:]*\d+')  # ~ See:
+
+def invalidate_referential_clues(problem_arr):
+  for p in problem_arr:
+    if any(c.isdigit() for c in p.clue): p.valid=False  # Clues cannot include references to numbers # brutal
+    if has_reference.search(p.clue): p.valid=False      # Clues cannot include references # better, but brittle
+  return problem_arr
+
+standard_terms={
+  'cryptic definition': 'Cryptic Definition',
+  'double definition': 'Double Definition',
+  'dd': 'Double Definition',
+  '&lit;': '&lit;',
+}
+
+def standardise_wordplay(txt):
+  tl=txt.lower()
+  for term, standardised in standard_terms.items():
+    if tl.startswith(term):
+      txt = standardised + txt[len(term):]
+      break
+  return txt
+
+def standardise_all_wordplay(problem_arr):
+  for p in problem_arr:
+    p.wordplay = standardise_wordplay(p.wordplay)
+  return problem_arr
+
+def fix_all_definition_brackets(problem_arr):
+  for p in problem_arr:
+    if p.wordplay.startswith('Double Definition'):  # This has been standardised
+      p.clue = p.clue.replace('}{', '} {')  # Maybe a space got filled in
+    else:
+      p.clue = p.clue.replace('{}', '').replace('}{', '') # Maybe over-bracketed
+  return problem_arr
+
+def discard_invalid_clues(problem_arr):
+  return [p for p in problem_arr if p.valid]
 

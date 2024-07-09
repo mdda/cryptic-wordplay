@@ -1,3 +1,4 @@
+import re
 from bs4 import BeautifulSoup, Comment, NavigableString
 from wordplay import Problem
 

@@ -181,6 +181,17 @@ def extract_pattern_from_clue_and_normalise(problem_arr):
     p.pattern = p.pattern.replace('(','').replace(')','').strip()
   return problem_arr
 
+def invalidate_missing(problem_arr):
+  required='ad clue pattern answer wordplay'.split(' ')
+  for p in problem_arr:
+    missing=False
+    for k in required:
+      if len(getattr(p, k, ''))==0: 
+        print(f"{k} missing from {p}")
+        missing=True
+    p.valid = not missing
+  return problem_arr
+
 # Process different page styles...
 has_reference = re.compile('[Ss]ee[\s\:]*\d+')  # ~ See:
 
@@ -217,6 +228,45 @@ def fix_all_definition_brackets(problem_arr):
     else:
       p.clue = p.clue.replace('{}', '').replace('}{', '') # Maybe over-bracketed
   return problem_arr
+
+def invalidate_missing_definition(problem_arr):
+  for p in problem_arr:
+    curlies='{}'
+    if p.wordplay.startswith("Double Definition"): # Need two sets of {}
+      curlies='{}{}'
+    clue_only_curlies = re.sub(r'[^\{\}]', '', p.clue)
+    if not clue_only_curlies.startswith(curlies):
+      print("Missing '{}' in {p}")
+      p.valid = False
+  return problem_arr
+
+def invalidate_answer_mismatches_pattern(problem_arr):
+  for p in problem_arr:
+    pattern_len_arr = re.split(r'[^\d]', p.pattern) # List of all lengths (str)
+    pattern_len = sum([int(pl) for pl in pattern_len_arr if len(pl)>0])
+    answer_letters = re.sub(r'[^A-Z]', '', p.answer) # All the upper-case characters in p.answer
+    answer_len = len(answer_letters)
+    if pattern_len != answer_len:
+      print(f"{pattern_len=} {answer_len=} in {p}")
+      p.valid=False
+  return problem_arr
+
+def invalidate_answer_mismatches_wordplay_somewhat(problem_arr):
+  for p in problem_arr:
+    if p.wordplay.startswith('Double Definition') or p.wordplay.startswith('Cryptic Definition'):  # These have been standardised    
+      continue # Cannot check
+    wordplay_output = re.sub(r'[^A-Z]', '', p.wordplay) # Extract the uppercase letters in p.wordplay
+    answer_letters  = re.sub(r'[^A-Z]', '', p.answer)   # All the upper-case characters in p.answer    
+    # Criteria : Do at least 75% of the letters match?
+    cnt=0
+    for wl in wordplay_output:
+      if wl in answer_letters:  # Super-simple check
+        cnt+=1
+    if cnt<len(answer_letters)*.75:
+      print(f"Found {cnt} wordplay letters of {len(answer_letters)} in {p}")
+      p.valid=False
+  return problem_arr
+
 
 def discard_invalid_clues(problem_arr):
   return [p for p in problem_arr if p.valid]

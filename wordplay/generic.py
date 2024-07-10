@@ -1,6 +1,6 @@
 import re
 from bs4 import BeautifulSoup, Comment, NavigableString
-from wordplay import Problem
+from . import Problem
 
 """
 soup = wordplay.get_content_from(site, fname_stub, author='teacow')
@@ -96,7 +96,7 @@ def add_spans_to_found(found, span_arr, debug=False):
       str_arr.append( span.text )
       continue
     #print(f"{span.get('style', '')=}")
-    if 'underline' in span.get('style', ''):
+    if 'underline' in span.get('style', '') or 'definition' in span.get('_class', ''):
       str_arr.append( '{' + span.text.strip() + '}' )
     else:
       str_arr.append( span.text.strip() )
@@ -167,7 +167,7 @@ def get_most_important_node_arr(content):
       max_arr=arr
   return max_arr
 
-def build_problem_list(clue_starts, content_next):
+def build_problem_arr(clue_starts, content_next):
   problem_arr=[]
   for i,c in enumerate(clue_starts):
     # Determine when to give up on this clue..
@@ -202,3 +202,9 @@ def build_problem_list(clue_starts, content_next):
         break
     #print("--- Try next element ---")
   return problem_arr
+
+def parse_content(content):
+  clue_starts = get_most_important_node_arr(content)
+  problem_arr = build_problem_arr(clue_starts, content.next_sibling)
+  return problem_arr
+  

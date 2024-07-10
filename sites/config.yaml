@@ -1,5 +1,6 @@
 fifteensquared:
   site_url:  https://www.fifteensquared.net/
+  site_author: https://www.fifteensquared.net/author/
   site_base: ./sites/fifteensquared
   css_content: div.entry-content
   # custom parsers in wordplay.custom: "FTS-style" and "P-style"

@@ -1,7 +1,7 @@
 import os, time
 import re
 #, json
-#import yaml
+import yaml
 
 import requests
 from bs4 import BeautifulSoup
@@ -10,7 +10,31 @@ from urllib.parse import urlparse  # To extract path information from urls
 #import numpy as np  
 import random # For random delays
 
+
+class Problem:
+  num, ad, clue, pattern, answer, wordplay, comment, valid=0,'', '', '', '', '', '', True
+  def __str__(self):
+    return f"{self.num:2d}{self.ad} : {self.answer} : '{self.clue}' ({self.pattern}) :: {self.wordplay} & '{self.comment}'"
+  def from_dict(self, found):
+    for k in 'num clue answer pattern wordplay comment'.split(' '):
+      if k in found:
+        setattr(self, k, found[k])
+  def as_dict(self):
+    d=dict()
+    for k in 'num ad clue answer pattern wordplay comment'.split(' '):
+      v=getattr(self, k)
+      if len(str(v))>0:
+        d[k]=v
+    return d
+  # wordplay : Capital letters get written into the grid/answer
+  # wordplay : ()* = anagrammed; (*anagram-signifier)
+  # wordplay : ()< = reversed; (<reversal-signifier)
+  # wordplay : [] = remove letters; next bracket (removal-signifier)  
+
 #import wordplay.custom, wordplay.generic
+from . import custom, generic
+
+
 
 def rel_path(p):
   return os.path.join(os.path.dirname(__file__), p)
@@ -20,8 +44,8 @@ config = OmegaConf.load(rel_path('../sites/config.yaml'))
 
 
 # https://www.fifteensquared.net/author/teacow/
-def get_all_author_index_pages(site, p='author', author='teacow', polite_delay_sec=1.0):
-  site_base, site_url = site['site_base'], site['site_url']
+def get_all_author_index_pages(site, author='teacow', polite_delay_sec=1.0):
+  site_base, site_url, site_author = site['site_base'], site['site_url'], site['site_author']
   os.makedirs(rel_path(f"../{site_base}/{author}"), exist_ok=True)
   page=1
   while True:
@@ -33,7 +57,7 @@ def get_all_author_index_pages(site, p='author', author='teacow', polite_delay_s
     if os.path.isfile(fname):
       print(f"Already have : {page_index}")
     else:
-      r = requests.get(f"{site_url}/{p}/{author}/page/{page:d}")
+      r = requests.get(f"{site_author}/{author}/page/{page:d}")
       if r.status_code==200: # Success
         print(f"Writing {fname}")
         with open(fname, 'wt') as f: 
@@ -101,20 +125,6 @@ def ensure_pages_downloaded(arr, site, author='teacow', polite_delay_sec=1.0):
       else:
         print(f"Got code {r.status_code} for {url}")
 
-class Problem:
-  num, ad, clue, pattern, answer, wordplay, comment, valid=0,'', '', '', '', '', '', True
-  def __str__(self):
-    return f"{self.num:2d}{self.ad} : {self.answer} : '{self.clue}' ({self.pattern}) :: {self.wordplay} & '{self.comment}'"
-  def from_dict(self, found):
-    for k in 'num clue answer pattern wordplay comment'.split(' '):
-      if k in found:
-        setattr(self, k, found[k])
-  # wordplay : Capital letters get written into the grid/answer
-  # wordplay : ()* = anagrammed; (*anagram-signifier)
-  # wordplay : ()< = reversed; (<reversal-signifier)
-  # wordplay : [] = remove letters; next bracket (removal-signifier)  
-
-
 def get_content_from(site, fname_stub, author='teacow'):
   page_html = f"{site['site_base']}/{author}/{fname_stub}.html"
   fname = rel_path(f"../{page_html}")
@@ -128,19 +138,19 @@ def parse_content(soup, use_custom=False, use_generic=True):
   problem_arr=[]
   content=soup.find('div', class_='entry-content')
   
-  if use_custom:
+  if use_custom and len(problem_arr)==0:
     if soup.find('div', class_='fts-group'):
       print("  fts-style custom parser")
-      problem_arr = wordplay.custom.clue_fts_style(content)
+      problem_arr = custom.clue_fts_style(content)
     else: # Default
       print("  p-style custom parser")
-      problem_arr = wordplay.custom.clue_p_style(content)
+      problem_arr = custom.clue_p_style(content)
     if len(problem_arr)==0:
       print("  FAILED TO EXTRACT DATA using custom parsers")
       
-  if use_generic:
+  if use_generic and len(problem_arr)==0:
     print("  generic parser")
-    problem_arr = wordplay.generic.ETC(content)
+    problem_arr = generic.parse_content(content)
     if len(problem_arr)==0:
       print("  FAILED TO EXTRACT DATA using generic parser")
       
@@ -204,6 +214,7 @@ def invalidate_referential_clues(problem_arr):
 standard_terms={
   'cryptic definition': 'Cryptic Definition',
   'double definition': 'Double Definition',
+  'double (cryptic) definition': 'Double Definition (cryptic)',
   'dd': 'Double Definition',
   '&lit;': '&lit;',
 }
@@ -236,7 +247,7 @@ def invalidate_missing_definition(problem_arr):
       curlies='{}{}'
     clue_only_curlies = re.sub(r'[^\{\}]', '', p.clue)
     if not clue_only_curlies.startswith(curlies):
-      print("Missing '{}' in {p}")
+      print(f"Missing '{{}}' in {p}")
       p.valid = False
   return problem_arr
 
@@ -271,3 +282,56 @@ def invalidate_answer_mismatches_wordplay_somewhat(problem_arr):
 def discard_invalid_clues(problem_arr):
   return [p for p in problem_arr if p.valid]
 
+
+
+def clean_content(problem_arr):
+  problem_arr = fix_ad_for_list(problem_arr)
+  problem_arr = extract_pattern_from_clue_and_normalise(problem_arr)
+  problem_arr = invalidate_missing(problem_arr)
+  problem_arr = invalidate_referential_clues(problem_arr)
+  
+  problem_arr = discard_invalid_clues(problem_arr)
+
+  problem_arr = standardise_all_wordplay(problem_arr)
+  problem_arr = fix_all_definition_brackets(problem_arr)
+  
+  problem_arr = invalidate_missing_definition(problem_arr)
+  problem_arr = invalidate_answer_mismatches_pattern(problem_arr)
+  problem_arr = invalidate_answer_mismatches_wordplay_somewhat(problem_arr)
+  
+  problem_arr = discard_invalid_clues(problem_arr)
+  
+  return problem_arr
+
+
+def create_yaml_from_url(site, url, author='teacow', overwrite=False, use_custom=False, use_generic=True):
+  fname_stub = url_to_fname_stub(url)
+  site_base, site_url = site['site_base'], site['site_url']
+  fname_base = f"{site_base}/{author}/{fname_stub}"
+  page_html, fyaml = f"{fname_base}.html", f"{fname_base}.yaml"
+  fname, fyaml = rel_path(f"../{page_html}"), rel_path(f"../{fyaml}")
+  
+  data=dict(url=url, fname=page_html, fname_stub=fname_stub, author=author, )
+  if not os.path.isfile(fname):
+    print(f"Failed to file {fname}")
+    return
+  if os.path.isfile(fyaml) and not overwrite:
+    print(f"Nothing to do - Found {fyaml}")
+    return
+  print(f"Processing : {fname}")
+  soup = get_content_from(site, fname_stub, author='teacow')
+  #with open(fname, 'rt') as f: 
+  #  soup = BeautifulSoup(f)
+  title=soup.find('h1', itemprop='headline')
+  if title is not None:
+    data['title']=title.text
+    
+  problem_arr = parse_content(soup, use_custom=use_custom, use_generic=use_generic)
+  problem_arr = clean_content(problem_arr)
+  
+  if len(problem_arr)>0:
+    data['clues']=[ p.as_dict() for p in problem_arr ]
+    with open(fyaml, 'w') as outfile:
+      yaml.dump(data, outfile, default_flow_style=False)
+  else:
+    print(f"Failed to parse {fname}")

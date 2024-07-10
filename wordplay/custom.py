@@ -3,12 +3,12 @@ from bs4 import BeautifulSoup, Comment, NavigableString
 from wordplay import Problem
 
 def clue_fts_style(content):
-  problem_arr=[]
+  problem_arr, ad = [], ''
   for group in content.find_all('div', class_='fts-group'):
     res = Problem()
+    res.ad=ad
     if not group.find('div', class_='fts-subgroup'):
-      res.ad = group.text[0].upper()  # Without subgroups => This is the heading for Across/Down
-      problem_arr.append(res)
+      ad = group.text[0].upper()  # Without subgroups => This is the heading for Across/Down
       continue
     try:
       for row, subgroup in enumerate(group.find_all('div', class_='fts-subgroup')):
@@ -46,14 +46,14 @@ def clue_fts_style(content):
   return problem_arr
 
 def clue_p_style(content):
-  problem_arr=[]
+  problem_arr, ad = [], ''
   for group in content.find_all('p'):
     res = Problem()
+    res.ad=ad
     if group.find('strong'):
       ad_maybe = group.text[0].upper()  # Without subgroups => This is the heading for Across/Down
       if ad_maybe in 'AD':
-        res.ad = ad_maybe
-      problem_arr.append(res)
+        ad = ad_maybe
       continue
     try:
       rows = [[],]

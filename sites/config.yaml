@@ -9,6 +9,7 @@ fifteensquared:
     
 timesforthetimes:
   site_url:  https://timesforthetimes.co.uk/
+  site_author: https://timesforthetimes.co.uk/author/
   site_base: ./sites/timesforthetimes
   css_content: div.entry-content
   #   example page contained table format - but each entry is in 2 trs...

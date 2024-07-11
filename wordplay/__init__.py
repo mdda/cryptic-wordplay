@@ -59,7 +59,7 @@ def get_all_author_index_pages(site, author='teacow', polite_delay_sec=1.0):
     else:
       r = requests.get(f"{site_author}/{author}/page/{page:d}")
       if r.status_code==200: # Success
-        print(f"Writing {fname}")
+        print(f"Writing {page_index}")
         with open(fname, 'wt') as f: 
           f.write(r.text)
         time.sleep(polite_delay_sec*(random.uniform(1., 3.))) # Short, variable delay
@@ -83,12 +83,14 @@ def extract_individual_page_urls_for_author(site, author='teacow'):
     with open(fname, 'rt') as f: 
       soup = BeautifulSoup(f, features="html.parser")
     # Off to the races!
-    # h2 itemprop="headline"
-    for header in soup.find_all('h2', itemprop='headline'):
-      #print(header)
+    # h2 class='entry-title'
+    for header in soup.find_all('h2', class_='entry-title'):
       link=header.find('a')
-      #print(link)
       pages.append(link['href'])
+    #if len(pages)==0:
+    #  for header in soup.find_all('h2', itemprop='headline'):
+    #    link=header.find('a')
+    #    pages.append(link['href'])
     page+=1
     #break
   return pages
@@ -131,7 +133,7 @@ def get_content_from(site, fname_stub, author='teacow'):
   with open(fname, 'rt') as f: 
     soup = BeautifulSoup(f, features="html.parser")
   return soup
-
+ 
 
 
 def XXXparse_content(content, use_custom=False, use_generic=True):
@@ -231,7 +233,12 @@ def standardise_wordplay(txt):
 
 def standardise_all_wordplay(problem_arr):
   for p in problem_arr:
-    p.wordplay = standardise_wordplay(p.wordplay)
+    answer = p.answer
+    wordplay = p.wordplay
+    if wordplay.startswith(answer):
+      wordplay = wordplay[len(answer):]
+      wordplay = re.sub(r'^[\s\-\–]+', '', wordplay)
+    p.wordplay = standardise_wordplay(wordplay)
   return problem_arr
 
 def fix_all_definition_brackets(problem_arr):
@@ -322,7 +329,7 @@ def create_yaml_from_url(site, url, author='teacow', overwrite=False, use_custom
   
   data=dict(url=url, fname=page_html, fname_stub=fname_stub, author=author, )
   if not os.path.isfile(fname):
-    print(f"Failed to file {fname}")
+    print(f"Failed to find file {page_html}")
     return
   if os.path.isfile(fyaml) and not overwrite:
     print(f"Nothing to do - Found {page_html}")
@@ -337,7 +344,7 @@ def create_yaml_from_url(site, url, author='teacow', overwrite=False, use_custom
   
   # TODO: Extract Setter, Publication and is_quick
   #   fname_stub is like  date_pub_serial_setter
-  extract_setter_etc = re.match(r'([\d\_\-]+)_([a-z\-]+)-(\d+)-([a-z]+)', fname_stub)
+  extract_setter_etc = re.match(r'([\d\_\-]*_)?([a-z\-]+)-(\d+)-([a-z\-]+)', fname_stub)
   if extract_setter_etc:
     data['publication']=extract_setter_etc.group(2)
     data['setter']=extract_setter_etc.group(4).replace('by-', '')

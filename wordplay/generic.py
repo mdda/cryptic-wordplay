@@ -20,6 +20,7 @@ is_answer   = re.compile(r'^[\"\']?[\-\sA-Z\'\’]+[\"\']?$')
 has_pattern = re.compile(r'(\([\d\-\,]+\))')
 has_lower   = re.compile(r'[a-z]')
 has_upper   = re.compile(r'[A-Z]')
+not_upper   = re.compile(r'[^A-Z]+')
 remove_nums = re.compile(r'^([\d\.]+\s*)?(.+?)(\s*\([\d\-\,]+\))?$')
 
 def add_num_to_found(found, txt):
@@ -42,10 +43,18 @@ def add_text_snippets_to_found(found, txt, allow_clue=False, debug=False):
       if debug: print(f"Setting found['pattern']={pattern_match.group(1)}")
       found['pattern'] = pattern_match.group(1)
     txt_no_nums = re.sub(remove_nums, r'\2', txt)
+    
     score_clue, score_wordplay = 0,0
     if has_lower.search(txt_no_nums) and has_upper.search(txt_no_nums):
-      score_clue=10
-      #score_wordplay=10
+      score_clue+=10
+      #score_wordplay+=10
+    txt_upper_only = re.sub(not_upper, ' ', txt_no_nums) # So spans of upper case are kept together, with spaces in between
+    txt_upper_only_group_counts = [ max(len(up)-1,0) for up in txt_upper_only.split(' ') ]
+    # True or 
+    if debug: print(f"{txt_upper_only=} {txt_upper_only_group_counts=}")
+    if sum(txt_upper_only_group_counts)>1:  # i.e. more than 1 group of multiple upper letters
+      score_wordplay+=20  
+      
     if pattern_match:
       score_clue+=10
     if '{' in txt_no_nums:
@@ -61,13 +70,19 @@ def add_text_snippets_to_found(found, txt, allow_clue=False, debug=False):
     parens = re.sub(r'[^\(\)]', '', txt) # only parens from original txt
     if len(parens)>2:
       score_wordplay+=(len(parens)-2)*5
+      
     tl=txt.lower()
     if tl.startswith('cryptic definition') or tl.startswith('double definition') or tl.startswith('&lit;') or txt.startswith('DD'):
       score_wordplay+=20
+    else:
+      for term in 'cryptic double definition'.split(' '):
+        if term in tl:
+          score_wordplay+=10
 
     if not allow_clue: 
       score_clue=-10
 
+    #debug=True
     # True or 
     if debug: print(f"Calculated : {score_clue=}, {score_wordplay=} for '{txt}'")
     if score_clue>score_wordplay:
@@ -180,6 +195,8 @@ def match_in_component_recursive(component, debug=False):
         linear = linear + make_linear(e, found, is_underlined=True)
       elif e.name=='strong' or e.name=='b' or e.name=='em' or e.name=='i':
         linear = linear + make_linear(e, found, is_underlined=is_underlined)
+      elif e.name=='td':  #  TD is a little questionable...  # or e.name=='td'  # TR even more so
+        linear = linear + make_linear(e, found, is_underlined=is_underlined)
       elif e.name=='br':
         gather_segment=True
         
@@ -220,11 +237,16 @@ def get_most_important_node_arr(content, debug=False):
   for k,arr in node_list_by_found.items():
     score=0
     if 'clue' in k: 
-      score+=5
-      if 'num' in k: score +=2
-      if 'pattern' in k: score +=5
-      if 'answer' in k: score +=5
-      if 'wordplay' in k: score +=5
+      #score+=5
+      #if 'num' in k: score +=2
+      #if 'pattern' in k: score +=5
+      #if 'answer' in k: score +=5
+      #if 'wordplay' in k: score +=5
+      score+=3
+      if 'num' in k: score *= 4
+      if 'pattern' in k: score *= 4
+      if 'answer' in k: score *= 2
+      if 'wordplay' in k: score *= 2
     score*=len(arr)
     #most_useful_found[k]=score
     if debug: print(f"{len(arr)}: {score=} :: {k}")

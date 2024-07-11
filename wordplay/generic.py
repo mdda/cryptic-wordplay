@@ -71,7 +71,9 @@ def add_text_snippets_to_found(found, txt, allow_clue=False, debug=False):
     # True or 
     if debug: print(f"Calculated : {score_clue=}, {score_wordplay=} for '{txt}'")
     if score_clue>score_wordplay:
-      if len(found.get('clue', ''))==0:
+      clue_prev = found.get('clue', '')
+      #if len(clue_prev)<len(txt_no_nums) and clue_prev in txt_no_nums:  # Accept if the clue that has been found is longer, and is within the new version
+      if len(clue_prev)==0 or clue_prev in txt_no_nums:  # Accept if no clue has been found or previous one is within the new version
         if debug: print(f"Setting found['clue']={txt_no_nums}")
         found['clue']=txt_no_nums
     elif score_wordplay>0:
@@ -84,8 +86,10 @@ def add_text_snippets_to_found(found, txt, allow_clue=False, debug=False):
         if txt != found['wordplay']:
           print(f"Setting found['comment']={txt}")
           found['comment']=(found.get('comment','')+' '+txt).strip()
+  return  # found may have been modified in-place
 
-def add_spans_to_found(found, span_arr, debug=False):
+                       
+def XXXadd_spans_to_found(found, span_arr, debug=False):
   if debug: print("Looking in spans", span_arr)
   str_arr=[]
   for span in span_arr:
@@ -95,15 +99,17 @@ def add_spans_to_found(found, span_arr, debug=False):
     if isinstance(span, NavigableString):
       str_arr.append( span.text )
       continue
-    #print(f"{span.get('style', '')=}")
-    if 'underline' in span.get('style', '') or 'definition' in span.get('_class', ''):
+    # TODO: EXPAND TO THE CASE WHERE A SPAN HAS AN INTERNAL SPAN...
+    #         See: teacow/2021_06_07_financial-times-16805-by-hamilton.html
+    #print(f"{span.get('style', '')=} {span.get('class', '')=}")  # a str and a list[str]
+    if 'underline' in span.get('style', '') or 'definition' in ' '.join(span.get('class', '')):
       str_arr.append( '{' + span.text.strip() + '}' )
     else:
       str_arr.append( span.text.strip() )
   spans_combined = ' '.join([s for s in str_arr]).strip()
   add_text_snippets_to_found(found, spans_combined, allow_clue=True, debug=debug)
 
-def match_in_component(component, debug=False):
+def XXXmatch_in_component(component, debug=False):
   found, span_arr = dict(), []
   if component is None or isinstance(component, (str, )):
     return found 
@@ -136,11 +142,71 @@ def match_in_component(component, debug=False):
     add_spans_to_found(found, span_arr, debug=debug)
   return found
 
-def get_most_important_node_arr(content):
+
+
+def add_linear_to_found(found, linear, debug=False):
+  if debug: print("Looking in linear", linear)
+  str_arr=[]
+  for d in linear:
+    if d.get('is_underlined', False):
+      str_arr.append( '{' + d['txt'].strip() + '}' )
+    else:
+      str_arr.append( d['txt'].strip() )
+  str_combined = ' '.join([s for s in str_arr]).strip()
+  add_text_snippets_to_found(found, str_combined, allow_clue=True, debug=debug)
+
+
+def match_in_component_recursive(component, debug=False):
+  found = dict()
+  if component is None or isinstance(component, (str, )):
+    return found 
+  # Read the internals, add to linear array of dicts with 'txt', and 'underline' as required
+  def make_linear(component, found, is_underlined=False, debug=debug):
+    linear = []
+    for e in component:
+      gather_segment=False
+      base = dict(is_underlined=is_underlined)
+      if isinstance(e, (Comment,)):
+        pass
+      elif isinstance(e, NavigableString): # Pure text
+        if len(e.string.strip())>0:
+          base['txt']=e.string.strip()
+          linear.append( base )
+        #continue
+      elif e.name=='span':
+        u = 'underline' in e.get('style', '') or 'definition' in ' '.join(e.get('class', ''))
+        linear = linear + make_linear(e, found, is_underlined=u or is_underlined)
+      elif e.name=='u':
+        linear = linear + make_linear(e, found, is_underlined=True)
+      elif e.name=='strong' or e.name=='b' or e.name=='em' or e.name=='i':
+        linear = linear + make_linear(e, found, is_underlined=is_underlined)
+      elif e.name=='br':
+        gather_segment=True
+        
+      if gather_segment and len(linear)>0:
+        add_linear_to_found(found, linear, debug=debug)
+        linear=[]
+        
+    if len(linear)>0:
+      add_linear_to_found(found, linear, debug=debug)
+      
+    return linear
+  linear = make_linear(component, found)
+  
+  #print(linear)
+  # ...
+  return found
+
+
+
+def get_most_important_node_arr(content, debug=False):
   node_list_by_found=dict()
   for component in content.descendants:
     if len(str(component).strip())==0: continue
-    found = match_in_component(component)
+      
+    #found = match_in_component(component)
+    found = match_in_component_recursive(component)
+   
     #print(str(component)[:100])
     #print("***", found)
     if len(found)>0:
@@ -154,20 +220,20 @@ def get_most_important_node_arr(content):
   for k,arr in node_list_by_found.items():
     score=0
     if 'clue' in k: 
-      score+=10
+      score+=5
       if 'num' in k: score +=2
-      if 'pattern' in k: score +=2
+      if 'pattern' in k: score +=5
       if 'answer' in k: score +=5
       if 'wordplay' in k: score +=5
     score*=len(arr)
     #most_useful_found[k]=score
-    #print(f"{len(arr)}: {score=} :: {k}")
+    if debug: print(f"{len(arr)}: {score=} :: {k}")
     if score>max_score:
       max_score=score
       max_arr=arr
   return max_arr
 
-def build_problem_arr(clue_starts, content_next):
+def build_problem_arr(clue_starts, content_next, debug=False):
   problem_arr=[]
   for i,c in enumerate(clue_starts):
     # Determine when to give up on this clue..
@@ -177,9 +243,11 @@ def build_problem_arr(clue_starts, content_next):
     found = dict()
     
     while c is not None:
-      found_new = match_in_component(c)
+      #found_new = match_in_component(c, debug=debug)
+      found_new = match_in_component_recursive(c, debug=debug)
+      
       if len(found_new)>0:
-        #print(found_new)
+        if debug: print(found_new)
         for k,v in found_new.items():
           if k not in found:
             found[k]=v
@@ -191,7 +259,7 @@ def build_problem_arr(clue_starts, content_next):
           #print("FILLED IN REQUIRED ENTRIES")
           problem = Problem()
           problem.from_dict(found) # Fill out the structure
-          #print(f"Saving : {problem}")
+          if debug: print(f"Saving : {problem}")
           problem_arr.append(problem)
           found=dict()
           break
@@ -200,7 +268,7 @@ def build_problem_arr(clue_starts, content_next):
         c = c.next_element  # Try next element
       if c==clue_ends:
         break
-    #print("--- Try next element ---")
+    if debug: print("--- Try next element ---")
   return problem_arr
 
 def parse_content(content):

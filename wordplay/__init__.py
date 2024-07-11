@@ -134,12 +134,11 @@ def get_content_from(site, fname_stub, author='teacow'):
 
 
 
-def parse_content(soup, use_custom=False, use_generic=True):
+def XXXparse_content(content, use_custom=False, use_generic=True):
   problem_arr=[]
-  content=soup.find('div', class_='entry-content')
   
   if use_custom and len(problem_arr)==0:
-    if soup.find('div', class_='fts-group'):
+    if content.find('div', class_='fts-group'):
       print("  fts-style custom parser")
       problem_arr = custom.clue_fts_style(content)
     else: # Default
@@ -162,10 +161,9 @@ def fix_ad_for_list(problem_arr):
   #   First : Check whether we've got numbers for everything
   drops, drop_last = 0, -1
   for i in range(len(problem_arr)-1):
-    if problem_arr[i].num > problem_arr[i+1].num:
+    if problem_arr[i].num > problem_arr[i+1].num > 0:
       drops+=1
       drop_last=i
-  #print(f"{drops=}, {drop_last=}")
   if drops==1: # Expected, good, case
     for i,p in enumerate(problem_arr):
       ad = 'A' if i<=drop_last else 'D'
@@ -174,6 +172,10 @@ def fix_ad_for_list(problem_arr):
       else:
         if ad!=p.ad:
           print(f"Mismatched Across/Down!\n  {p}")
+  else:
+    print(f"{drops=}, {drop_last=} in ad fixer")
+    for i,p in enumerate(problem_arr):
+      print(f"index={i:2d} : num={p.num:2d}")
   return problem_arr
 
 def extract_pattern_from_clue_and_normalise(problem_arr):
@@ -247,7 +249,7 @@ def invalidate_missing_definition(problem_arr):
       curlies='{}{}'
     clue_only_curlies = re.sub(r'[^\{\}]', '', p.clue)
     if not clue_only_curlies.startswith(curlies):
-      print(f"Missing '{{}}' in {p}")
+      print(f"Missing '{curlies}' in {p}")
       p.valid = False
   return problem_arr
 
@@ -278,6 +280,12 @@ def invalidate_answer_mismatches_wordplay_somewhat(problem_arr):
       p.valid=False
   return problem_arr
 
+def invalidate_wordplay_too_long(problem_arr, wordplay_len_max=100):
+  for p in problem_arr:
+    if len(p.wordplay) > wordplay_len_max:
+      p.valid = False
+  return problem_arr
+
 
 def discard_invalid_clues(problem_arr):
   return [p for p in problem_arr if p.valid]
@@ -298,6 +306,7 @@ def clean_content(problem_arr):
   problem_arr = invalidate_missing_definition(problem_arr)
   problem_arr = invalidate_answer_mismatches_pattern(problem_arr)
   problem_arr = invalidate_answer_mismatches_wordplay_somewhat(problem_arr)
+  problem_arr = invalidate_wordplay_too_long(problem_arr)
   
   problem_arr = discard_invalid_clues(problem_arr)
   
@@ -316,18 +325,46 @@ def create_yaml_from_url(site, url, author='teacow', overwrite=False, use_custom
     print(f"Failed to file {fname}")
     return
   if os.path.isfile(fyaml) and not overwrite:
-    print(f"Nothing to do - Found {fyaml}")
+    print(f"Nothing to do - Found {page_html}")
     return
   print(f"Processing : {fname}")
-  soup = get_content_from(site, fname_stub, author='teacow')
+  soup = get_content_from(site, fname_stub, author=author)
   #with open(fname, 'rt') as f: 
   #  soup = BeautifulSoup(f)
   title=soup.find('h1', itemprop='headline')
   if title is not None:
     data['title']=title.text
+  
+  # TODO: Extract Setter, Publication and is_quick
+  #   fname_stub is like  date_pub_serial_setter
+  extract_setter_etc = re.match(r'([\d\_\-]+)_([a-z\-]+)-(\d+)-([a-z]+)', fname_stub)
+  if extract_setter_etc:
+    data['publication']=extract_setter_etc.group(2)
+    data['setter']=extract_setter_etc.group(4).replace('by-', '')
+    data['is_quick'] = 'quick' in data['publication'].lower()
     
-  problem_arr = parse_content(soup, use_custom=use_custom, use_generic=use_generic)
-  problem_arr = clean_content(problem_arr)
+  #content=soup.find('div', class_='entry-content')
+  content=soup.select_one(site['css_content'])
+
+  #problem_arr = parse_content(soup, use_custom=use_custom, use_generic=use_generic)
+  problem_arr=[]
+  if use_custom and len(problem_arr)==0:
+    if content.find('div', class_='fts-group'):
+      print("  fts-style custom parser")
+      problem_arr = custom.clue_fts_style(content)
+    else: # Default
+      print("  p-style custom parser")
+      problem_arr = custom.clue_p_style(content)
+    problem_arr = clean_content(problem_arr)
+    if len(problem_arr)==0:
+      print("  FAILED TO EXTRACT DATA using custom parsers")
+      
+  if use_generic and len(problem_arr)==0:
+    print("  generic parser")
+    problem_arr = generic.parse_content(content)
+    problem_arr = clean_content(problem_arr)
+    if len(problem_arr)==0:
+      print("  FAILED TO EXTRACT DATA using generic parser")
   
   if len(problem_arr)>0:
     data['clues']=[ p.as_dict() for p in problem_arr ]

@@ -31,7 +31,6 @@ class Problem:
   # wordplay : ()< = reversed; (<reversal-signifier)
   # wordplay : [] = remove letters; next bracket (removal-signifier)  
 
-#import wordplay.custom, wordplay.generic
 from . import custom, generic
 
 

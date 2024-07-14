@@ -14,6 +14,62 @@ groups
 
 items = groups[10].find_all('div', class_='fts-subgroup')
 items
+
+tag_sequences = defaultdict(list)
+
+def traverse_and_record(element, current_sequence=None):
+  "Recursively traverses the HTML tree and records tag sequences."
+  #print("ENTERED")
+  if current_sequence is None:
+    current_sequence = []
+
+  if isinstance(element, NavigableString):
+    # Handle text content here.
+    # For example, print it or append it to a list.
+    #print("Text:", element.strip())
+    if element.strip():
+      current_sequence.append('TXT')
+      tag_sequences[">".join(current_sequence)].append(
+        element.string.strip()
+      )
+  #  pass
+  elif element.name and not isinstance(element, (Comment)): # , BeautifulSoup
+    # Only consider tags with direct text content
+    current_sequence.append(element.name)
+    if element.string and element.string.strip():
+      tag_sequences[">".join(current_sequence)].append(
+        #element.string.strip() if element.string and element.string.strip() else ''
+        element.string.strip()
+      )
+    
+  if hasattr(element, 'children'):
+    for child in element.children:
+      traverse_and_record(child, current_sequence.copy())
+
+if False:
+  #traverse_and_record(content.parent())
+  traverse_and_record(soup.find('div', class_='entry-content'))
+  #traverse_and_record(soup)
+  
+  # Filter for potentially repetitive patterns (appearing more than once)
+  repetitive_patterns = {
+    selector: examples
+    for selector, examples in tag_sequences.items()
+    if len(examples) > 1
+  }
+  
+  for selector, examples in repetitive_patterns.items():
+    print(f"CSS Selector: {selector}")
+    print(f"Example Text: {len(examples)=} {examples}")
+    print("-" * 20)
+
+# Take an element, and go through its parts:
+#   TXT != ''
+#   BR
+#   P
+#   SPAN
+# and see what matches we have - return a dict with the matches for:
+  #   NUM, CLUE_PART, PATTERN, ANSWER, WORDPLAY, COMMENT/EXTRAx
 """
 
 is_answer   = re.compile(r'^[\"\']?[\-\sA-Z\'\’]+[\"\']?$')
@@ -22,6 +78,11 @@ has_lower   = re.compile(r'[a-z]')
 has_upper   = re.compile(r'[A-Z]')
 not_upper   = re.compile(r'[^A-Z]+')
 remove_nums = re.compile(r'^([\d\.]+\s*)?(.+?)(\s*\([\d\-\,]+\))?$')
+
+#wordplay.generic.is_answer.match("A-SD")
+#wordplay.generic.has_pattern.search("  (2,5)") # Better than match
+#wordplay.generic.is_answer.match("KING’S RANSOM")
+
 
 def add_num_to_found(found, txt):
   arr = txt.strip().replace('.','').split(' ')

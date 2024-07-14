@@ -2,6 +2,34 @@ import re
 from bs4 import BeautifulSoup, Comment, NavigableString
 from wordplay import Problem
 
+"""
+# FTS-style
+groups = content.select('div.fts-group')
+print(len(groups))
+
+items = groups[10].select('div.fts-subgroup')
+for item in items:
+  print(item)
+  print("***")
+
+from collections import defaultdict
+# Let's look to see whether we can find the repetitive elements in the groups...
+tag_counts=defaultdict(int)
+
+for i,tag in enumerate(content):
+  tag_counts[tag.name] += 1
+  #if True: # i==5:
+    #print(tag)
+  #  print(dir(tag))
+    #print(tag.name)
+  #  break
+tag_counts  
+# fts-style defaultdict(int, {None: 8, 'p': 6, 'div': 1}) -- this kind misses the important stuff
+# p-style   defaultdict(int, {None: 39, 'p': 37, 'div': 1})
+
+
+"""
+
 def clue_fts_style(content):
   problem_arr, ad = [], ''
   for group in content.find_all('div', class_='fts-group'):

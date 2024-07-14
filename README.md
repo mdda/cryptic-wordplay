@@ -9,12 +9,12 @@ wordplay breakdowns of many cryptic crosswords
 * in formats that look nice, but often strain the limits of HTML taste...
 
 Since permission has not been sought from these websites (yet), 
-the full dataset is not downloadable from here.  
-Scripts will be provided so that it can be gathered automatically.
+the full dataset is not downloadable from here. Scripts will (soon) be provided so that it can be gathered automatically - calling into the existing `wordplay` module.  For now, there is a sample dataset in the `./prebuilt` directory, with two splits : "train" and "val".
 
-For now, though, there is a sample dataset in the `./prebuilt` directory, with two splits : "train" and "val".
-Intentionally, the "test" version of the wordplay data is not provided, so 
-that it won't be incorporated into web trawls (which could contaminate LLM training sets).
+### Splits
+
+Intentionally, the "test" version of the wordplay data is not provided, 
+so that it won't be incorporated into web trawls (which could contaminate LLM training sets).
 The splits performed here make use of the "val" and "test" wordlists derived from [Cryptonite](https://github.com/aviaefrat/cryptonite) - 
 a dataset that we're keen to use as the guide to our splits (again to reduce the risk of training set contamination).
 
@@ -47,6 +47,11 @@ Each line of the `jsonl` file contains the following fields:
 * `setter` : name of the puzzle creator
 * `publication` : where the puzzle originally appeared (simplistic)
 * `is_quick` : whether the puzzle was a 'Quick' variant (simplistic)
+
+Note that the lines in the dataset are order according to their extraction / scraping - so they
+are grouped by author / in date order / in puzzle clue-order.  It is very likely that they 
+require shuffling before use (or, practically speaking, an index list should be shuffled, so they
+can be indexed into in a pre-defined 'random' order).
 
 
 ## Download

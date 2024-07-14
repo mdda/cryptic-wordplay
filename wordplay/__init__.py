@@ -1,7 +1,6 @@
 import os, time
 import re
-#, json
-import yaml
+import yaml, json
 
 import requests
 from bs4 import BeautifulSoup
@@ -378,3 +377,64 @@ def create_yaml_from_url(site, url, author='teacow', overwrite=False, use_custom
       yaml.dump(data, outfile, default_flow_style=False)
   else:
     print(f"Failed to parse {fname}")
+
+
+def remove_non_uppers(s):
+  return re.sub(r'[^A-Z]', '' , s)
+
+def load_cryptonite_wordlist(split):
+  words=set()
+  with open(rel_path(f"../prebuilt/cryptonite.{split}.txt"), 'rt') as fin:
+    for l in fin.readlines():
+      words.add( l.strip() )
+  return words
+ 
+def gather_data_for_author(site, author='teacow'):
+  cryptonite_test_words=load_cryptonite_wordlist("test")
+  cryptonite_val_words =load_cryptonite_wordlist("val")
+
+  site_base = site['site_base']
+  author_path = rel_path(f"../{site_base}/{author}")
+    
+  clues_train, clues_val=[],[]  # These are going to be big...
+  for fyaml in sorted(os.listdir(author_path)):
+    if not fyaml.endswith('.yaml'): continue
+    if fyaml.startswith('author_aggregate'): continue  # Not present any more
+    with open(f"{author_path}/{fyaml}", 'r') as infile:
+      data_loaded = yaml.safe_load(infile)
+    clues_all = data_loaded['clues']
+    
+    # Add file-wise fields into individual clues
+    for clue in clues_all:
+      clue['is_quick']=data_loaded.get('is_quick', None)
+      clue['publication']=data_loaded.get('publication', None)
+      clue['setter']=data_loaded.get('setter', None)
+      clue['author']=author  # Attribution FTW!
+      
+    # Now do the splits - consistent with cryptonite
+    clues_nontest = [ clue for clue in clues_all
+      if remove_non_uppers(clue['answer']) not in cryptonite_test_words  # Filter out the cryptonite_test set
+    ]
+    for clue in clues_nontest:
+      if remove_non_uppers(clue['answer']) in cryptonite_val_words:  # Now split into train+val
+        clues_val.append(clue)
+      else:
+        clues_train.append(clue)
+    print(f"{len(clues_all):3d}=all, {len(clues_nontest):3d}=not_test : {fyaml}")
+    
+  #def save_aggregate_yaml(clues, stub='train'):
+  #  data=dict(clues=clues)
+  #  final_yaml = f"{author_path}/author_aggregate_{stub}.yaml"
+  #  with open(final_yaml, 'w') as outfile:
+  #    yaml.dump(data, outfile, default_flow_style=False)
+  #  print(f"Saved {len(clues):4d}={stub: <5s} : {final_yaml}")
+    
+  def save_aggregate_jsonl(clues, stub='train'):
+    final_jsonl = f"{author_path}/author_aggregate_{stub}.jsonl"
+    with open(final_jsonl, 'w') as outfile:
+      for clue in clues:
+        outfile.write(json.dumps(clue) + "\n")
+    print(f"Saved {len(clues):4d} clues in {stub: <5s}")
+    
+  save_aggregate_jsonl(clues_train, 'train')
+  save_aggregate_jsonl(clues_val, 'val')

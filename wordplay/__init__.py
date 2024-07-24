@@ -15,7 +15,7 @@ class Problem:
   def __str__(self):
     return f"{self.num:2d}{self.ad} : {self.answer} : '{self.clue}' ({self.pattern}) :: {self.wordplay} & '{self.comment}'"
   def from_dict(self, found):
-    for k in 'num clue answer pattern wordplay comment'.split(' '):
+    for k in 'num ad clue answer pattern wordplay comment'.split(' '):
       if k in found:
         setattr(self, k, found[k])
   def as_dict(self):
@@ -318,7 +318,8 @@ def clean_content(problem_arr):
   return problem_arr
 
 
-def create_yaml_from_url(site, url, author='teacow', overwrite=False, use_custom=False, use_generic=True):
+def create_yaml_from_url(site, url, author='teacow', overwrite=False, force_parse=False, 
+                         use_custom=False, use_generic=True):
   fname_stub = url_to_fname_stub(url)
   site_base, site_url = site['site_base'], site['site_url']
   fname_base = f"{site_base}/{author}/{fname_stub}"
@@ -329,7 +330,7 @@ def create_yaml_from_url(site, url, author='teacow', overwrite=False, use_custom
   if not os.path.isfile(fname):
     print(f"Failed to find file {page_html}")
     return
-  if os.path.isfile(fyaml) and not overwrite:
+  if os.path.isfile(fyaml) and not overwrite and not force_parse:
     print(f"Nothing to do - Found {page_html}")
     return
   print(f"Processing : {fname}")
@@ -372,11 +373,14 @@ def create_yaml_from_url(site, url, author='teacow', overwrite=False, use_custom
       print("  FAILED TO EXTRACT DATA using generic parser")
   
   if len(problem_arr)>0:
-    data['clues']=[ p.as_dict() for p in problem_arr ]
-    with open(fyaml, 'w') as outfile:
-      yaml.dump(data, outfile, default_flow_style=False)
+    if overwrite:
+      data['clues']=[ p.as_dict() for p in problem_arr ]
+      with open(fyaml, 'w') as outfile:
+        yaml.dump(data, outfile, default_flow_style=False)
   else:
     print(f"Failed to parse {fname}")
+    
+  return problem_arr
 
 
 def remove_non_uppers(s):

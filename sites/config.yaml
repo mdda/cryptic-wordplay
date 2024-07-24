@@ -13,4 +13,10 @@ timesforthetimes:
   site_base: ./sites/timesforthetimes
   css_content: div.entry-content
   #   example page contained table format - but each entry is in 2 trs...
-  
+
+test:
+  site_url:  https://example.com/
+  site_author: https://example.com/author/
+  site_base: ./sites/test
+  css_content: div.entry-content
+

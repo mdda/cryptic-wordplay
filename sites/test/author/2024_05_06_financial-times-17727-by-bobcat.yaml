@@ -1,0 +1,178 @@
+author: author
+clues:
+- ad: A
+  answer: REACTION TIME
+  clue: '{Measure of response} from mate in erotic novel'
+  num: 1
+  pattern: 8,4
+  wordplay: (MATE IN EROTIC)* (*novel)
+- ad: A
+  answer: SEVERAL
+  clue: '{More than one} retired clergyman housed in close'
+  num: 8
+  pattern: '7'
+  wordplay: (REV)< (clergyman, <retired) in SEAL (close)
+- ad: A
+  answer: HAIRNET
+  clue: Musical number about {lock-keeper?}
+  num: 9
+  pattern: '7'
+  wordplay: HAIR (musical) + (TEN)< (number, <about)
+- ad: A
+  answer: CHOWDER
+  clue: Right to sidestep host about to go round carrying hot {soup}
+  num: 11
+  pattern: '7'
+  wordplay: (C[r]OWD (host, R (right to sidestep)) + (RE)< (about, <to go round))
+    carrying H (hot)
+- ad: A
+  answer: RATAFIA
+  clue: '{Cordial} drunk at a fair'
+  num: 12
+  pattern: '7'
+  wordplay: (AT A FAIR)* (*drunk)
+- ad: A
+  answer: ON ICE
+  clue: "{Get put off} as dons\u2019 vices serially exposed"
+  num: 13
+  pattern: 2,3
+  wordplay: '[d]ON[s] [v]ICE[s] (serially exposed)'
+- ad: A
+  answer: BASEBALLS
+  clue: "{We may be struck by American} foundation\u2019s courage"
+  num: 14
+  pattern: '9'
+  wordplay: BASE (foundation) + BALLS (courage)
+- ad: A
+  answer: EXTREMELY
+  clue: '{Very} old cathedral holds mass after terce on a regular basis'
+  num: 16
+  pattern: '9'
+  wordplay: (EX (old) + ELY (cathedral)) holds (M (mass) after T[e]R[c]E (on a regular
+    basis))
+- ad: A
+  answer: PRUDE
+  clue: '{Puritan} indiscreet to remove two layers of clothing'
+  num: 19
+  pattern: '5'
+  wordplay: '[im]PRUDE[nt] (indiscreet, to remove two layers of clothes)'
+- ad: A
+  answer: RESCUER
+  clue: '{I deliver} key to board game with queen'
+  num: 21
+  pattern: '7'
+  wordplay: ESC (key) to board RU (game) with ER (queen)
+- ad: A
+  answer: INTEGER
+  clue: '{Number} of sheep in target area losing heart'
+  num: 23
+  pattern: '7'
+  wordplay: TEG (sheep) in IN[n]ER (target area, losing heart)
+- ad: A
+  answer: CABINET
+  clue: '{Cupboard for displaying} wine after one replaces the centre'
+  num: 24
+  pattern: '7'
+  wordplay: CABERNET (wine) after I (one) replaces the centre (i.e., the ER)
+- ad: A
+  answer: TOENAIL
+  clue: "Spooner\u2019s Manx characteristic that {could be ingrown}"
+  num: 25
+  pattern: '7'
+  wordplay: '"no tail" = TOENAIL (Manx characteristic, "Spooner''s")'
+- ad: A
+  answer: INEXPLICABLE
+  clue: "Bail Cineplex out? That\u2019s {unaccountable}"
+  num: 26
+  pattern: '12'
+  wordplay: (BAIL CINEPLEX)* (*out)
+- ad: D
+  answer: RAVIOLI
+  clue: '{Course} primarily requiring an old instrument is curtailed'
+  num: 1
+  pattern: '7'
+  wordplay: R[equiring] A[n] (primarily) + VIOI[n] (old instrument, curtailed)
+- ad: D
+  answer: ABRIDGE
+  clue: American university missing third {cut}
+  num: 2
+  pattern: '7'
+  wordplay: A (American) + [cam]BRIDGE (university, missing third)
+- ad: D
+  answer: TOLERABLE
+  clue: '{Satisfactory} function adopted by board has lowered resistance'
+  num: 3
+  pattern: '9'
+  wordplay: (ROLE adopted by TABLE (board)) has lowered R (resistance)
+- ad: D
+  answer: OTHER
+  clue: '{Second} bishop to be absolved from trouble'
+  num: 4
+  pattern: '5'
+  wordplay: '[b]OTHER (trouble, B (bishop) to be absolved from)'
+- ad: D
+  answer: TWIN-TUB
+  clue: '{Domestic appliance}, one of two on boat'
+  num: 5
+  pattern: 4-3
+  wordplay: TWIN (one of two) on TUB (boat)
+- ad: D
+  answer: MINDFUL
+  clue: "{Observant} mastermind fully apprehends \u2026"
+  num: 6
+  pattern: '7'
+  wordplay: '[master]MIND FUL[ly] (apprehends)'
+- ad: D
+  answer: PSYCHOMETRIC
+  clue: "\u2026 complex chemistry with unlimited scope to produce {this sort of test}"
+  num: 7
+  pattern: '12'
+  wordplay: (CHEMISTRY with [s]COP[e] (unlimited))* (*complex)
+- ad: D
+  answer: TRANSFERRALS
+  clue: '{Conveyances} moving Stranraer folk periodically south'
+  num: 10
+  pattern: '12'
+  wordplay: (STRANRAER + F[o]L[k] (periodically))* (*moving) + S (south)
+- ad: D
+  answer: STYLISTIC
+  clue: Hairdresser starts to interpret criticism {of literary technique}
+  num: 15
+  pattern: '9'
+  wordplay: STYLIST (hairdresser) + I[nterpret] C[riticism] (starts to)
+- ad: D
+  answer: TEST BAN
+  clue: '{International agreement seeking to avoid catastrophe} by {prohibiting matches?}'
+  num: 17
+  pattern: 4,3
+  wordplay: Double Definition (cryptic)
+- ad: D
+  answer: EQUINOX
+  clue: '{Biannual event} for horses needing steer to replace finale'
+  num: 18
+  pattern: '7'
+  wordplay: EQUINE (for horses) needing OX (steer) to replace finale
+- ad: D
+  answer: POT HERB
+  clue: Make a fuss over second rate {vegetable}
+  num: 19
+  pattern: 3,4
+  wordplay: POTHER (make a fuss) over B (second rate)
+- ad: D
+  answer: UPGRADE
+  clue: Finished article relocated in detailed garden {improvement}
+  num: 20
+  pattern: '7'
+  wordplay: UP (finished) + GARDE[n] (detailed, A (article) relocated)
+- ad: D
+  answer: RATEL
+  clue: '{African native}, employing hands, took food inside'
+  num: 22
+  pattern: '5'
+  wordplay: R L (hands, right and left), ATE (took food) inside
+fname: ./sites/test/author/2024_05_06_financial-times-17727-by-bobcat.html
+fname_stub: 2024_05_06_financial-times-17727-by-bobcat
+is_quick: false
+publication: financial-times
+setter: bobcat
+url: https://example.com/2024_05_06_financial-times-17727-by-bobcat

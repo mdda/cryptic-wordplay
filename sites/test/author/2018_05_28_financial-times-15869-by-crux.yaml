@@ -1,0 +1,183 @@
+author: author
+clues:
+- ad: A
+  answer: "KING\u2019S RANSOM"
+  clue: '{High cost of restoring the monarchy?}'
+  num: 1
+  pattern: 5,6
+  wordplay: Cryptic Definition
+- ad: A
+  answer: DEW
+  clue: '{Precipitate} a mid-week revolution'
+  num: 7
+  pattern: '3'
+  wordplay: WED< (mid-week, revolution)
+- ad: A
+  answer: CALVE
+  clue: What we do with beef, reportedly, {cows do}!
+  num: 9
+  pattern: '5'
+  wordplay: "\u201CCALVE\u201D (sounds like carve, what we do with beef)"
+- ad: A
+  answer: GUARDSMEN
+  clue: '{Soldiers} surprisingly armed with guns'
+  num: 10
+  pattern: '9'
+  wordplay: (ARMED GUNS)* (*surprisingly)
+- ad: A
+  answer: BANKROLLS
+  clue: "Pile up an expensive car \u2013 {finances required}!"
+  num: 11
+  pattern: '9'
+  wordplay: BANK (pile up) + ROLLS (expensive car)
+- ad: A
+  answer: FLAIL
+  clue: '{It can mean windmill} folk regularly feel sick'
+  num: 12
+  pattern: '5'
+  wordplay: F[o]L[k] (regularly) AIL (feel sick)
+- ad: A
+  answer: CRETANS
+  clue: Correct paints needed oddly to depict these {islanders}
+  num: 13
+  pattern: '7'
+  wordplay: C[o]R[r]E[c]T [p]A[i]N[t]S (oddly)
+- ad: A
+  answer: AXIS
+  clue: "A team\u2019s {centre-line}"
+  num: 15
+  pattern: '4'
+  wordplay: "A XI (team, eleven players in cricket) \u2018S"
+- ad: A
+  answer: ODES
+  clue: '{Some poetry} does somehow'
+  num: 18
+  pattern: '4'
+  wordplay: (DOES)* (*somehow)
+- ad: A
+  answer: RAGDOLL
+  clue: "{A little girl\u2019s favourite} paper model"
+  num: 20
+  pattern: '7'
+  wordplay: RAG (paper) + DOLL (model)
+- ad: A
+  answer: RHINO
+  clue: "{Old money} starts to return high interest \u2013 nice one!"
+  num: 23
+  pattern: '5'
+  wordplay: (starts to) R[eturn] H[igh] I[nterest] N[ice] O[ne]
+- ad: A
+  answer: NUTS ABOUT
+  clue: '{Very keen on} backing knock-out at a boxing match'
+  num: 24
+  pattern: 4,5
+  wordplay: STUN< (knock-out, backing) + A BOUT (a boxing match)
+- ad: A
+  answer: FALSE MOVE
+  clue: Safe volume emitting uranium, {can be dangerous defusing bomb}
+  num: 26
+  pattern: 5,4
+  wordplay: (SAFE VOL[u]ME (emitting uranium))* (*dangerous)
+- ad: A
+  answer: IN FUN
+  clue: Farmers blocked in {as a joke}
+  num: 27
+  pattern: 2,3
+  wordplay: "NFU (National Farmer\u2019s Union) blocked IN"
+- ad: A
+  answer: ATMOSPHERIC
+  clue: Compare this with change {of air}
+  num: 29
+  pattern: '11'
+  wordplay: (COMPARE THIS*) *(with change)
+- ad: D
+  answer: KICKBACK
+  clue: '{Pass to goalkeeper}, perhaps, displays a {special gift}'
+  comment: ' -     KICK BACK (pass to goalkeeper)'
+  num: 1
+  pattern: '8'
+  wordplay: Double Definition
+- ad: D
+  answer: NO LONGER
+  clue: "Refusal by unsociable type to embrace golf \u2013 {not any more}!"
+  num: 2
+  pattern: 2,6
+  wordplay: NO (refusal) + (LONER (unsociable type) to embrace G (golf))
+- ad: D
+  answer: ANGELUS
+  clue: '{Daily prayer} the Spanish held in part of Scotland'
+  num: 4
+  pattern: '7'
+  wordplay: EL (the in Spanish) held in ANGUS (part of Scotland)
+- ad: D
+  answer: MODIFYING
+  clue: '{Changing} one in modern aviation wastes fuel ultimately'
+  num: 6
+  pattern: '9'
+  wordplay: I (one) in MOD (modern) F[l]YING (aviation, wasting L, fuel ultimately)
+- ad: D
+  answer: DEMEAN
+  clue: '{Humble} clergyman takes me to his heart'
+  num: 7
+  pattern: '6'
+  wordplay: DEAN (clergyman) takes ME to his heart
+- ad: D
+  answer: WANGLE
+  clue: '{Engineer} with western perspective'
+  num: 8
+  pattern: '6'
+  wordplay: W (western) + ANGLE (perspective)
+- ad: D
+  answer: ANDROMEDA
+  clue: "Dead Roman represented as {Perseus\u2019 lover}"
+  num: 14
+  pattern: '9'
+  wordplay: (DEAD ROMAN)* (*represented)
+- ad: D
+  answer: GO TOO FAR
+  clue: '{Display lack of tact} and {overcompensate}, perhaps'
+  num: 16
+  pattern: 2,3,3
+  wordplay: Double Definition
+- ad: D
+  answer: PLATONIC
+  clue: '{Spiritual} refresher after climbing mountain'
+  num: 17
+  pattern: '8'
+  wordplay: TONIC (refresher) after ALP< (climbing, mountain)
+- ad: D
+  answer: SUNROOM
+  clue: "Runs badly with low turnover yet {the outlook\u2019s bright}!"
+  num: 19
+  pattern: '7'
+  wordplay: (RUNS)* (*badly) + MOO< (low, turnover)
+- ad: D
+  answer: ROTTERS
+  clue: Tinkers turn into {rogues} with Rex as leader
+  num: 20
+  pattern: '7'
+  wordplay: R (Rex) as leader of [p]OTTERS (tinkers)
+- ad: D
+  answer: PROFIT
+  clue: '{Make money} as a fortune-teller, say'
+  num: 21
+  pattern: '6'
+  wordplay: "(sounds like, say) \u201CPROPHET\u201D (fortune teller)"
+- ad: D
+  answer: FILL-IN
+  clue: '{Substitute} not quite satisfying hunger'
+  num: 22
+  pattern: 4-2
+  wordplay: FILLIN[g] (satisfying hunger, not quite)
+- ad: D
+  answer: AMISH
+  clue: '{Religious sect} created by Abraham is here'
+  num: 25
+  pattern: '5'
+  wordplay: '[abrah]AM IS H[ere] (created by)'
+fname: ./sites/test/author/2018_05_28_financial-times-15869-by-crux.html
+fname_stub: 2018_05_28_financial-times-15869-by-crux
+is_quick: false
+publication: financial-times
+setter: crux
+url: https://example.com/2018_05_28_financial-times-15869-by-crux

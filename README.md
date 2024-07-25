@@ -105,7 +105,7 @@ There are two kinds of scraping tools included:
 * A more advanced `generic` scraper that (should) adaptively figure out how the list of clues/answers/wordplay annotations is formatted, and scrape those
 
 
-> This repo should include additional scraping scipts to coincide with the our presentation of the paper:
+> This repo should include additional scraping scripts to coincide with the our presentation of the paper:
 > ["Proving that Cryptic Crossword Clue Answers are Correct"](https://arxiv.org/abs/2407.08824)
 > at the [ICML 2024 Workshop on LLMs and Cognition](https://llm-cognition.github.io/) in Vienna on 27-July-2024.
 

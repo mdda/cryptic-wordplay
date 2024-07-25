@@ -33,12 +33,24 @@ for case in test_cases:  # [1:2]
 
   with open(f"{fname_base}.yaml", 'r') as infile:
     data_loaded = yaml.safe_load(infile)
-    problem_arr_gold = []
+    problem_arr_custom = []
     for clue in data_loaded['clues']:
       p=wordplay.Problem()
       p.from_dict(clue)
-      problem_arr_gold.append(p)
+      problem_arr_custom.append(p)
+      #print(p)
 
-  for c_gold, c_generic in zip(problem_arr_gold, problem_arr):
-    print(c_gold)
-    print(c_generic)
+  for c_custom, c_generic in zip(problem_arr_custom, problem_arr):
+    same=True
+    c_custom_dict =c_custom.as_dict()
+    c_generic_dict=c_generic.as_dict()
+    for k in 'ad clue pattern answer wordplay'.split(' '):
+      c_custom_nospc =c_custom_dict.get(k, 'MISSING').replace(' ','')
+      c_generic_nospc=c_generic_dict.get(k, 'NOTFOUND').replace(' ','')
+      if c_custom_nospc != c_generic_nospc:
+        same=False
+        break
+    if not same:
+      print(c_custom)
+      print(c_generic)
+      print()

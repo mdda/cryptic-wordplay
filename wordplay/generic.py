@@ -84,16 +84,20 @@ remove_nums = re.compile(r'^([\d\.]+\s*)?(.+?)(\s*\([\d\-\,]+\))?$')
 #wordplay.generic.is_answer.match("KING’S RANSOM")
 
 
-def add_num_to_found(found, txt):
-  arr = txt.strip().replace('.','').split(' ')
-  try:
-    found['num'] = int(arr[0])
-  except:
-    pass
+#def add_num_to_found(found, txt):
 
 def add_text_snippets_to_found(found, txt, allow_clue=False, debug=False):
   if debug: print(f'Looking for things in "{txt}" {allow_clue=}')
-  add_num_to_found(found, txt)
+  #add_num_to_found(found, txt)
+  
+  arr = txt.strip().replace('.','').split(' ')
+  try:
+    found['num'] = int(arr[0])
+    if arr[0]==''.join(arr) and found['num']>0:
+      return # we set the num, and that was all that there was...
+  except:
+    pass
+  
   # This could be CLUE_PART, PATTERN, ANSWER, WORDPLAY, COMMENT/EXTRA or nothing
   if is_answer.match(txt.strip()): # Likely ANSWER, on its own, at start, whole thing
     if debug: print(f"Setting found['answer']={txt}")
@@ -103,6 +107,8 @@ def add_text_snippets_to_found(found, txt, allow_clue=False, debug=False):
     if pattern_match:
       if debug: print(f"Setting found['pattern']={pattern_match.group(1)}")
       found['pattern'] = pattern_match.group(1)
+      if found['pattern']==txt.strip():
+        return  # If pattern matched whole txt - all done!
     txt_no_nums = re.sub(remove_nums, r'\2', txt)
     
     score_clue, score_wordplay = 0,0
@@ -162,7 +168,7 @@ def add_text_snippets_to_found(found, txt, allow_clue=False, debug=False):
         if txt != found['wordplay']:
           print(f"Setting found['comment']={txt}")
           found['comment']=(found.get('comment','')+' '+txt).strip()
-  return  # found may have been modified in-place
+  return  # 'found' probably modified in-place
 
                        
 def XXXadd_spans_to_found(found, span_arr, debug=False):

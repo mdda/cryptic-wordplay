@@ -19,11 +19,11 @@ test_cases = [
 for case in test_cases:  # [1:2]
   url = case['url']
   
-  if False: # Test custom (vs that already saved as groundtruth in repo)
+  if False: # Test saved (vs that already saved as groundtruth in repo)
     problem_arr = wordplay.create_yaml_from_url(site, url, author=author, 
                               overwrite=False, force_parse=True, use_custom=True, use_generic=False)
     
-  if True: # Test generic parser (vs that already saved as groundtruth in repo from custom parser)
+  if True: # Test parser parser (vs that already saved as groundtruth in repo from saved parser)
     problem_arr = wordplay.create_yaml_from_url(site, url, author=author, 
                               overwrite=False, force_parse=True, use_custom=False, use_generic=True)
   
@@ -33,24 +33,57 @@ for case in test_cases:  # [1:2]
 
   with open(f"{fname_base}.yaml", 'r') as infile:
     data_loaded = yaml.safe_load(infile)
-    problem_arr_custom = []
+    problem_arr_saved = []
     for clue in data_loaded['clues']:
       p=wordplay.Problem()
       p.from_dict(clue)
-      problem_arr_custom.append(p)
+      problem_arr_saved.append(p)
       #print(p)
 
-  for c_custom, c_generic in zip(problem_arr_custom, problem_arr):
+  for c_save in problem_arr_saved:  # Look through all the known-good examples
+    found=False
+    for c_parse in problem_arr: # Check against all newly found problems
+      if c_save.num!=c_parse.num or c_save.ad!=c_parse.ad:
+        continue
+      found=True
+      same=True
+      c_save_dict =c_save.as_dict()
+      c_parse_dict=c_parse.as_dict()
+      for k in 'clue pattern answer wordplay'.split(' '):
+        c_save_nospc =c_save_dict.get(k, 'MISSING').replace(' ','')
+        c_parse_nospc=c_parse_dict.get(k, 'NOTFOUND').replace(' ','')
+        if c_save_nospc != c_parse_nospc:
+          same=False
+          break
+      if not same:
+        print("\nMis-match between saved, and the following:")
+        print(c_saved)
+        print(c_parser)
+      c_parse.num=-1 # Make sure this not printed again
+    if not found:
+      print("\nThe following saved problem did not match any found problem:")
+      print(c_save)
+
+  for c_parse in problem_arr: # Print out non-matched newly found problems
+    if c_parse.num>=0:
+      print("\nThe following matched no saved problem:")
+      print(c_parse)
+      print()
+
+  continue
+  # Should do something more sophisticated than this to match the 'num' fields
+  #   .. so that missing a clue out doesn't invalidate rest of clues vs gold data on disk
+  for c_saved, c_parser in zip(problem_arr_saved, problem_arr):
     same=True
-    c_custom_dict =c_custom.as_dict()
-    c_generic_dict=c_generic.as_dict()
+    c_saved_dict =c_saved.as_dict()
+    c_parser_dict=c_parser.as_dict()
     for k in 'ad clue pattern answer wordplay'.split(' '):
-      c_custom_nospc =c_custom_dict.get(k, 'MISSING').replace(' ','')
-      c_generic_nospc=c_generic_dict.get(k, 'NOTFOUND').replace(' ','')
-      if c_custom_nospc != c_generic_nospc:
+      c_saved_nospc =c_saved_dict.get(k, 'MISSING').replace(' ','')
+      c_parser_nospc=c_parser_dict.get(k, 'NOTFOUND').replace(' ','')
+      if c_saved_nospc != c_parser_nospc:
         same=False
         break
     if not same:
-      print(c_custom)
-      print(c_generic)
+      print(c_saved)
+      print(c_parser)
       print()

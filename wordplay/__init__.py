@@ -373,7 +373,7 @@ def create_yaml_from_url(site, url, author='teacow', overwrite=False, force_pars
       print("  FAILED TO EXTRACT DATA using generic parser")
   
   if len(problem_arr)>0:
-    if overwrite:
+    if not os.path.isfile(fyaml) or overwrite:
       data['clues']=[ p.as_dict() for p in problem_arr ]
       with open(fyaml, 'w') as outfile:
         yaml.dump(data, outfile, default_flow_style=False)

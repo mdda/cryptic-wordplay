@@ -21,6 +21,15 @@ is included here in the `wordplay` module, and convenience scripts will soon be 
 data can be gathered automatically (though it is not clear that more than the 5000 wordplay samples provided in the dataset sample in `./prebuilt` are essential to train a useful model - see below).
 
 
+### LLM post-training warning
+
+If you are looking for a post training set for an LLM : Look elsewhere!  
+This dataset is intended for experimentation on reasoning tasks, 
+and simply trying to use the dataset as training material 
+would be as pointless as training on ARC Challenge tasks...  
+
+
+
 ## Download
 
 There is a sample dataset with ~5400 training examples in the `./prebuilt` directory, with two splits : "train" and "val".
@@ -129,4 +138,5 @@ The following paper(s) make use of the Wordplay dataset:
 
 * ["Proving that Cryptic Crossword Clue Answers are Correct"](https://arxiv.org/abs/2407.08824) - Andrews & Witteveen (2024)
   + Accepted at the [ICML 2024 Workshop on LLMs and Cognition](https://llm-cognition.github.io/)
+  + [Explainer Video on YouTube](https://www.youtube.com/watch?v=vLITb6XDTQ8)
 

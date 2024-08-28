@@ -90,14 +90,15 @@ Each clue/answer/wordplay data item is also:
 To use the scrapers directly, ensure its dependencies are installed:
 
 ```bash
+pip install --upgrade pip
 pip install requests bs4 OmegaConf
 git clone https://github.com/mdda/cryptic-wordplay.git
 ```
 
-Import the module (it looks up its own configuration, and caches website files in `./wordplay/sites`):
+Import the module (it looks up its own configuration from `./sites/config.yaml`, and caches website files in `./sites/SITENAME/`):
 
 ```python
-p='./wordplay/cryptic-wordplay'
+p='./cryptic-wordplay'
 if p not in sys.path:
   sys.path.append(p)
 

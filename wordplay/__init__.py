@@ -213,6 +213,16 @@ def invalidate_referential_clues(problem_arr):
     if has_reference.search(p.clue): p.valid=False      # Clues cannot include references # better, but brittle
   return problem_arr
 
+def remove_answer_from_clue(problem_arr):
+  for p in problem_arr:
+    answer = p.answer.strip()
+    clue = p.clue.strip()
+    if clue.upper().startswith(answer.upper()):
+      clue = clue[len(answer):]
+      clue = re.sub(r'^[\s\-\–]+', '', clue)
+    p.clue = clue
+  return problem_arr
+
 standard_terms={
   'cryptic definition': 'Cryptic Definition',
   'double definition': 'Double Definition',
@@ -231,9 +241,9 @@ def standardise_wordplay(txt):
 
 def standardise_all_wordplay(problem_arr):
   for p in problem_arr:
-    answer = p.answer
-    wordplay = p.wordplay
-    if wordplay.startswith(answer):
+    answer = p.answer.strip()
+    wordplay = p.wordplay.strip()
+    if wordplay.upper().startswith(answer.upper()):
       wordplay = wordplay[len(answer):]
       wordplay = re.sub(r'^[\s\-\–]+', '', wordplay)
     p.wordplay = standardise_wordplay(wordplay)
@@ -319,6 +329,7 @@ def clean_content(problem_arr):
   
   problem_arr = discard_invalid_clues(problem_arr)
 
+  problem_arr = remove_answer_from_clue(problem_arr)
   problem_arr = standardise_all_wordplay(problem_arr)
   problem_arr = fix_all_definition_brackets(problem_arr)
   

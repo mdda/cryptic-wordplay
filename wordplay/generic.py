@@ -72,6 +72,7 @@ if False:
   #   NUM, CLUE_PART, PATTERN, ANSWER, WORDPLAY, COMMENT/EXTRAx
 """
 
+is_qnum     = re.compile(r'^([\d]+)[\.aAdD]?')
 is_answer   = re.compile(r'^[\"\']?[\-\sA-Z\'\’]+[\"\']?$')
 has_pattern = re.compile(r'(\([\d\-\,]+\))')
 has_lower   = re.compile(r'[a-z]')
@@ -90,13 +91,18 @@ def add_text_snippets_to_found(found, txt, allow_clue=False, debug=False):
   if debug: print(f'Looking for things in "{txt}" {allow_clue=}')
   #add_num_to_found(found, txt)
   
-  arr = txt.strip().replace('.','').split(' ')
-  try:
-    found['num'] = int(arr[0])
-    if arr[0]==''.join(arr) and found['num']>0:
+  #arr = txt.strip().replace('.','').split(' ')
+  #try:
+  #  found['num'] = int(arr[0])
+  #  if arr[0]==''.join(arr) and found['num']>0:
+  #    return # we set the num, and that was all that there was...
+  #except:
+  #  pass
+  qnum_match = is_qnum.match(txt.strip())
+  if qnum_match:  # Starts with a number (maybe with a/d)
+    found['num'] = int(qnum_match.group(1)) # Definitely a number
+    if ' ' not in txt.strip():
       return # we set the num, and that was all that there was...
-  except:
-    pass
   
   # This could be CLUE_PART, PATTERN, ANSWER, WORDPLAY, COMMENT/EXTRA or nothing
   if is_answer.match(txt.strip()): # Likely ANSWER, on its own, at start, whole thing

@@ -13,7 +13,7 @@ import random # For random delays
 class Problem:
   num, ad, clue, pattern, answer, wordplay, comment, valid=0,'', '', '', '', '', '', True
   def __str__(self):
-    return f"{self.num:2d}{self.ad} : {self.answer} : '{self.clue}' ({self.pattern}) :: {self.wordplay} & '{self.comment}'"
+    return f"#{self.num:2d}{self.ad} : A='{self.answer}' : Q='{self.clue}' ({self.pattern}) :: W='{self.wordplay}' & C='{self.comment}'"
   def from_dict(self, found):
     for k in 'num ad clue answer pattern wordplay comment'.split(' '):
       if k in found:
@@ -53,16 +53,16 @@ def get_all_author_index_pages(site, author='teacow', polite_delay_sec=1.0):
     if os.path.isfile(fname_end):
       break # No need to keep going - have already found that there are no more
     if os.path.isfile(fname):
-      print(f"Already have : {page_index}")
+      print(f"  Already have : {page_index}")
     else:
       r = requests.get(f"{site_author}/{author}/page/{page:d}")
       if r.status_code==200: # Success
-        print(f"Writing {page_index}")
+        print(f"  Writing {page_index}")
         with open(fname, 'wt') as f: 
           f.write(r.text)
         time.sleep(polite_delay_sec*(random.uniform(1., 3.))) # Short, variable delay
       else:
-        print(f"Finishing with {fname_end}")
+        print(f"  Finishing with {page_index}")
         with open(fname_end, 'wt') as f: 
           f.write(f"Finished with a {r.status_code}\n")
         break
@@ -113,17 +113,17 @@ def ensure_pages_downloaded(arr, site, author='teacow', polite_delay_sec=1.0):
     fname = rel_path(f"../{page_html}")
     
     if os.path.isfile(fname):
-      print(f"  Found {page_html}")
+      print(f"  Already have : {page_html}")
     else:
-      #print(f"  Missing {page_html}"); continue
+      print(f"  Fetching : {page_html}")
       r = requests.get(url) #  download the file from 'url'
       if r.status_code==200: # Success
-        print(f"  Writing {page_html}")
+        print(f"    Writing: {page_html}")
         with open(fname, 'wt') as f: 
           f.write(r.text)
         time.sleep(polite_delay_sec*(random.uniform(1., 3.))) # Short, variable delay
       else:
-        print(f"Got code {r.status_code} for {url}")
+        print(f"*Got error code {r.status_code} for {url}*")
 
 def get_content_from(site, fname_stub, author='teacow'):
   page_html = f"{site['site_base']}/{author}/{fname_stub}.html"
@@ -261,12 +261,26 @@ def invalidate_missing_definition(problem_arr):
 def invalidate_answer_mismatches_pattern(problem_arr):
   for p in problem_arr:
     pattern_len_arr = re.split(r'[^\d]', p.pattern) # List of all lengths (str)
-    pattern_len = sum([int(pl) for pl in pattern_len_arr if len(pl)>0])
-    answer_letters = re.sub(r'[^A-Z]', '', p.answer) # All the upper-case characters in p.answer
-    answer_len = len(answer_letters)
-    if pattern_len != answer_len:
-      print(f"{pattern_len=} {answer_len=} in {p}")
-      p.valid=False
+    if False:
+      pattern_len = sum([int(pl) for pl in pattern_len_arr if len(pl)>0])
+      answer_letters = re.sub(r'[^A-Z]', '', p.answer) # All the upper-case characters in p.answer
+      answer_len = len(answer_letters)
+      if pattern_len != answer_len:
+        print(f"{pattern_len=} {answer_len=} in {p}")
+        p.valid=False
+    if True:
+      pattern_len_arr = [ int(p) for p in pattern_len_arr if len(p)>0 ]
+      answer_arr = p.answer.upper().replace('-', ' ').split(' ')
+      answer_len_arr = [ len(a) for a in answer_arr ]
+      if len(pattern_len_arr) == len(answer_len_arr):
+        for i in range(len(pattern_len_arr)):
+          if pattern_len_arr[i] != answer_len_arr[i]:
+            print(f"{pattern_len_arr=} {answer_len_arr=} in {p}")
+            p.valid=False
+            break
+      else:
+        print(f"{pattern_len_arr=} {answer_len_arr=} in {p}")
+        p.valid=False
   return problem_arr
 
 def invalidate_answer_mismatches_wordplay_somewhat(problem_arr):
@@ -328,26 +342,33 @@ def create_yaml_from_url(site, url, author='teacow', overwrite=False, force_pars
   
   data=dict(url=url, fname=page_html, fname_stub=fname_stub, author=author, )
   if not os.path.isfile(fname):
-    print(f"Failed to find file {page_html}")
+    print(f"  Failed to find file {page_html}")
     return
   if os.path.isfile(fyaml) and not overwrite and not force_parse:
-    print(f"Nothing to do - Found {page_html}")
+    print(f"  Nothing to do - Found YAML for {page_html}")
     return
+  
   print(f"Processing : {fname_base}")
   soup = get_content_from(site, fname_stub, author=author)
   #with open(fname, 'rt') as f: 
   #  soup = BeautifulSoup(f)
+
   title=soup.find('h1', itemprop='headline')
+  if title is None:
+    title=soup.find('h1', class_='entry-title')
   if title is not None:
     data['title']=title.text
   
   # TODO: Extract Setter, Publication and is_quick
-  #   fname_stub is like  date_pub_serial_setter
+  #   fname_stub might be like  date_pub_serial_setter
   extract_setter_etc = re.match(r'([\d\_\-]*_)?([a-z\-]+)-(\d+)-([a-z\-]+)', fname_stub)
   if extract_setter_etc:
     data['publication']=extract_setter_etc.group(2)
     data['setter']=extract_setter_etc.group(4).replace('by-', '')
     data['is_quick'] = 'quick' in data['publication'].lower()
+  else:
+    if 'title' in data:
+      data['is_quick'] = 'quick' in data['title'].lower()
     
   #content=soup.find('div', class_='entry-content')
   content=soup.select_one(site['css_content'])
@@ -378,7 +399,7 @@ def create_yaml_from_url(site, url, author='teacow', overwrite=False, force_pars
       with open(fyaml, 'w') as outfile:
         yaml.dump(data, outfile, default_flow_style=False)
   else:
-    print(f"Failed to parse {fname}")
+    print(f"  Failed to parse {fname}")
     
   return problem_arr
 
@@ -399,6 +420,7 @@ def gather_data_for_author(site, author='teacow'):
 
   site_base = site['site_base']
   author_path = rel_path(f"../{site_base}/{author}")
+  author_path_printable =f"{site_base}/{author}"
     
   clues_train, clues_val=[],[]  # These are going to be big...
   for fyaml in sorted(os.listdir(author_path)):
@@ -434,11 +456,12 @@ def gather_data_for_author(site, author='teacow'):
   #  print(f"Saved {len(clues):4d}={stub: <5s} : {final_yaml}")
     
   def save_aggregate_jsonl(clues, stub='train'):
-    final_jsonl = f"{author_path}/author_aggregate_{stub}.jsonl"
-    with open(final_jsonl, 'w') as outfile:
+    aggregate_jsonl = f"author_aggregate_{stub}.jsonl"
+    with open(f"{author_path}/{aggregate_jsonl}", 'w') as outfile:
       for clue in clues:
         outfile.write(json.dumps(clue) + "\n")
-    print(f"Saved {len(clues):4d} clues in {stub: <5s}")
+    #print(f"Saved {len(clues):4d} clues in : {stub:s}")
+    print(f"Saved {len(clues):4d} clues in : {author_path_printable}/{aggregate_jsonl}")
     
   save_aggregate_jsonl(clues_train, 'train')
   save_aggregate_jsonl(clues_val, 'val')

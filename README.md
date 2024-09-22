@@ -115,9 +115,35 @@ There are two kinds of scraping tools included:
 * A more advanced `generic` scraper that (should) adaptively figure out how the list of clues/answers/wordplay annotations is formatted, and scrape those
 
 
-> This repo should include additional scraping scripts to coincide with the our presentation of the paper:
-> ["Proving that Cryptic Crossword Clue Answers are Correct"](https://arxiv.org/abs/2407.08824)
-> at the [ICML 2024 Workshop on LLMs and Cognition](https://llm-cognition.github.io/) in Vienna on 27-July-2024.
+### Assembling a dataset (train/val splits)
+
+Example lines to gather several authors :
+
+```bash
+python create_dataset_with_splits.py  --author teacow --site fifteensquared --pages -1
+python create_dataset_with_splits.py  --author pipkirby --site timesforthetimes --pages -1
+python create_dataset_with_splits.py  --author chris-woods --site timesforthetimes --pages -1
+```
+
+Once _enough_ data has been generated, find the files within the directory structure:
+```bash
+for split in train val; do
+  find sites | grep author_aggregate_${split}.jsonl | sort > list.${split}
+done
+```
+
+* Edit the `list.train` and `list.val` files to select for the authors/sites required
+
+Combine the `jsonl` files listed into `wordplay_DATE_SPLIT.jsonl` :
+```bash
+dt=`date --iso-8601=days`
+for split in train val; do
+  { xargs cat < list.${split} ; } | uniq > wordplay_${dt}_${split}.jsonl
+done
+```
+
+Use the data wisely!
+
 
 
 ## Dataset Citation

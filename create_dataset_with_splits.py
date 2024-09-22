@@ -74,16 +74,3 @@ print("Gathering pages into author jsonl files (with splits)")
 wordplay.gather_data_for_author(site, author=author)
 
 
-gather_dataset="""
-for split in train val; do
-  find sites | grep author_aggregate_${split}.jsonl | sort > list.${split}
-done
-# Edit the files to select for the authors/sites required
-dt=`date --iso-8601=minutes`
-for split in train val; do
-  { xargs cat < list.${split} ; } | uniq > ${dt}_wordplay.${split}.jsonl
-done
-"""
-# python create_dataset_with_splits.py  --author teacow --site fifteensquared --pages -1
-# python create_dataset_with_splits.py  --author pipkirby --site timesforthetimes --pages -1
-# ? python create_dataset_with_splits.py  --author curarist --site timesforthetimes --pages -1

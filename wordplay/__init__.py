@@ -205,7 +205,7 @@ def invalidate_missing(problem_arr):
   return problem_arr
 
 # Process different page styles...
-has_reference = re.compile('[Ss]ee[\s\:]*\d+')  # ~ See:
+has_reference = re.compile(r'[Ss]ee[\s\:]*\d+')  # ~ See:
 
 def invalidate_referential_clues(problem_arr):
   for p in problem_arr:
@@ -333,7 +333,7 @@ def create_yaml_from_url(site, url, author='teacow', overwrite=False, force_pars
   if os.path.isfile(fyaml) and not overwrite and not force_parse:
     print(f"Nothing to do - Found {page_html}")
     return
-  print(f"Processing : {fname}")
+  print(f"Processing : {fname_base}")
   soup = get_content_from(site, fname_stub, author=author)
   #with open(fname, 'rt') as f: 
   #  soup = BeautifulSoup(f)
@@ -356,17 +356,17 @@ def create_yaml_from_url(site, url, author='teacow', overwrite=False, force_pars
   problem_arr=[]
   if use_custom and len(problem_arr)==0:
     if content.find('div', class_='fts-group'):
-      print("  fts-style custom parser")
+      print("  Using fts-style custom parser")
       problem_arr = custom.clue_fts_style(content)
     else: # Default
-      print("  p-style custom parser")
+      print("  Using p-style custom parser")
       problem_arr = custom.clue_p_style(content)
     problem_arr = clean_content(problem_arr)
     if len(problem_arr)==0:
       print("  FAILED TO EXTRACT DATA using custom parsers")
       
   if use_generic and len(problem_arr)==0:
-    print("  generic parser")
+    print("  Using generic parser")
     problem_arr = generic.parse_content(content)
     problem_arr = clean_content(problem_arr)
     if len(problem_arr)==0:

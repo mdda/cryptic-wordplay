@@ -40,6 +40,7 @@ for case in test_cases:  # [1:2]
       problem_arr_saved.append(p)
       #print(p)
 
+  differences_reported=False
   for c_save in problem_arr_saved:  # Look through all the known-good examples
     found=False
     for c_parse in problem_arr: # Check against all newly found problems
@@ -59,17 +60,24 @@ for case in test_cases:  # [1:2]
         print("\nMis-match between saved, and the following:")
         print(c_saved)
         print(c_parser)
+        differences_reported=True
       c_parse.num=-1 # Make sure this not printed again
     if not found:
       print("\nThe following saved problem did not match any found problem:")
       print(c_save)
+      differences_reported=True
 
   for c_parse in problem_arr: # Print out non-matched newly found problems
     if c_parse.num>=0:
       print("\nThe following matched no saved problem:")
       print(c_parse)
       print()
+      differences_reported=True
 
+  if not differences_reported:
+    print("* No problems detected * ")
+    print()
+    
   continue
   # Should do something more sophisticated than this to match the 'num' fields
   #   .. so that missing a clue out doesn't invalidate rest of clues vs gold data on disk

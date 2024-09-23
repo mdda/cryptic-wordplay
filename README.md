@@ -37,9 +37,9 @@ There is a sample dataset with ~5400 training examples in the `./prebuilt` direc
 This sample has the following characteristics:
 * Single author: `teacow` on [https://FifteenSquared.net/](https://FifteenSquared.net/author/teacow)
   + chosen for their clear and consistent `wordplay` annotations across more than 6 years of submission
-* (Predominantly) Financial Times clue solutions - typically of difficulty similiar to the regular Times Cryptic
+* Financial Times clue solutions (predominantly) - typically of difficulty similiar to the regular Times Cryptic
 * Retrieved using `custom` (i.e. manually coded) scraping tools 
-  + Should not suffer from partial captures
+  + should not suffer from partial captures
 
 Even with 'only' 5K examples, this sample dataset has been found suffient to fine-tune ~7B models to guess at `definition` and `wordplay` pairs for new clues.  
 
@@ -111,13 +111,19 @@ webpages.  Accesses are spaced apart so as not to inconvenience the sites' maint
 
 There are two kinds of scraping tools included: 
 * The `custom` scrapers used for the sample dataset in `./prebuilt`
-  + Specifically built to capture `div.fts-group` and `p[]` styles of HTML
+  + Specifically built to capture `div.fts-group` and `p[]` styles of HTML pages
 * A more advanced `generic` scraper that (should) adaptively figure out how the list of clues/answers/wordplay annotations is formatted, and scrape those
+  + This is not perfect, but is able to gather a good percentage of available pages
+* When/if there is time available, the next avenue to improve things is probably to experiment with LLM-based parser generation
+  + Testing a parse is quick/cheap, and can be verified to some degree
+    - so testing all cached parse methods is also relatively cheap
+  + And if none works, then ask a commercial LLM (such as Gemini-Flash) to come up with a parsing scheme
+    - and loop until it works or exhaustion sets in
 
 
-### Assembling a dataset (train/val splits)
+### Assembling a dataset (with train/val splits)
 
-Example lines to gather several authors :
+Here are some example invocations of the dataset creation utility that pull from several authors :
 
 ```bash
 python create_dataset_with_splits.py  --author teacow --site fifteensquared --pages -1
@@ -126,23 +132,25 @@ python create_dataset_with_splits.py  --author chris-woods --site timesforthetim
 ```
 
 Once _enough_ data has been generated, find the files within the directory structure:
+
 ```bash
 for split in train val; do
   find sites | grep author_aggregate_${split}.jsonl | sort > list.${split}
 done
 ```
 
-* Edit the `list.train` and `list.val` files to select for the authors/sites required
+This will create `list.train` and `list.val` files with lists of files that can be combined.
+Edit these lists to select for the authors/sites required.
 
-Combine the `jsonl` files listed into `wordplay_DATE_SPLIT.jsonl` :
+Then, combine the `jsonl` files listed into `wordplay_DATE_SPLIT.jsonl` :
 ```bash
-dt=`date --iso-8601=days`
+dt=`date --iso-8601=date`
 for split in train val; do
   { xargs cat < list.${split} ; } | uniq > wordplay_${dt}_${split}.jsonl
 done
 ```
 
-Use the data wisely!
+Good luck with the Cryptic Crossword solving!
 
 
 

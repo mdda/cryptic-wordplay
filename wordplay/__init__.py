@@ -375,11 +375,11 @@ def create_yaml_from_url(site, url, author='teacow', overwrite=False, force_pars
   extract_setter_etc = re.match(r'([\d\_\-]*_)?([a-z\-]+)-(\d+)-([a-z\-]+)', fname_stub)
   if extract_setter_etc:
     data['publication']=extract_setter_etc.group(2)
-    data['setter']=extract_setter_etc.group(4).replace('by-', '')
-    data['is_quick'] = 'quick' in data['publication'].lower()
+    data['setter']     =extract_setter_etc.group(4).replace('by-', '')
+    data['is_quick']   ='quick' in data['publication'].lower()
   else:
     if 'title' in data:
-      data['is_quick'] = 'quick' in data['title'].lower()
+      data['is_quick'] ='quick' in data['title'].lower()
     
   #content=soup.find('div', class_='entry-content')
   content=soup.select_one(site['css_content'])
@@ -443,10 +443,10 @@ def gather_data_for_author(site, author='teacow'):
     
     # Add file-wise fields into individual clues
     for clue in clues_all:
-      clue['is_quick']=data_loaded.get('is_quick', None)
+      clue['is_quick']   =data_loaded.get('is_quick', None)
       clue['publication']=data_loaded.get('publication', None)
-      clue['setter']=data_loaded.get('setter', None)
-      clue['author']=author  # Attribution FTW!
+      clue['setter']     =data_loaded.get('setter', None)
+      clue['author']     =author  # Attribution FTW!
       
     # Now do the splits - consistent with cryptonite
     clues_nontest = [ clue for clue in clues_all
